@@ -1,4 +1,4 @@
-apply plugin: "java"
+apply plugin: "application"
 
 repositories {
     mavenCentral()
@@ -7,11 +7,25 @@ repositories {
 dependencies {
     compile "org.flywaydb:flyway-core:5.0.7"
     compile "mysql:mysql-connector-java:6.0.6"
+    compile "com.fasterxml.jackson.core:jackson-databind:2.9.5"
+
+    testCompile "junit:junit:4.12"
 }
+
+run.environment([
+    "VCAP_SERVICES": "{\"p-mysql\": [{\"credentials\": {\"jdbcUrl\": \"jdbc:mysql://127.0.0.1:3306/movies?user=root\"}, \"name\": \"movies-mysql\"}]}",
+    "SERVICE_NAME" : "p-mysql"
+])
+
+task migrate(dependsOn: "run")
+
+def mainClass = "com.tygern.migrations.Migrate"
+
+mainClassName = mainClass
 
 jar {
     manifest {
-        attributes "Main-Class": "com.tygern.migrations.Migrate"
+        attributes "Main-Class": mainClass
     }
     from {
         configurations.compile.collect {
